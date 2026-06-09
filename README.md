@@ -6,11 +6,27 @@
 
 ## Install
 
+### Fresh clone (recommended)
+
+```bash
+git clone https://github.com/jpoindexter/ai-agent-skills
+cd ai-agent-skills
+./bootstrap.sh
+```
+
+`bootstrap.sh` does two things in one step:
+1. Installs all skills to `~/.claude/skills/`
+2. Wires a `post-merge` git hook so future `git pull`s auto-reinstall
+
+Reload Claude Code after running. You're done — no manual steps needed after this.
+
+### Existing clone / manual install
+
 ```bash
 ./install.sh
 ```
 
-Copies all `*/SKILL.md` files to `~/.claude/skills/`. Reload Claude Code to activate.
+Copies all `*/SKILL.md` files to `~/.claude/skills/`. Use this if you cloned before `bootstrap.sh` existed, or want to reinstall without pulling.
 
 Preview what will be installed first:
 
@@ -18,7 +34,17 @@ Preview what will be installed first:
 ./install.sh --dry-run
 ```
 
-To install a single skill manually:
+### Keeping skills up to date
+
+Once `bootstrap.sh` has been run once, `git pull` handles everything:
+
+```bash
+git pull  # post-merge hook fires automatically → skills reinstalled
+```
+
+No manual `install.sh` needed after a pull.
+
+### Install a single skill
 
 ```bash
 cp keep-green/SKILL.md ~/.claude/skills/keep-green/SKILL.md
