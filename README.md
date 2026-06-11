@@ -253,11 +253,11 @@ Self-paced (omit the interval):
 ```
 
 ```
-/loop hill-climb vanta-ts/src/ to zero TypeScript `any` types.
+/loop hill-climb src/ to zero TypeScript `any` types.
 ```
 
 ```
-/loop hill-climb the codebase to a clean vanta lint.
+/loop hill-climb the codebase to a clean lint.
 ```
 
 **Per-wake report:**
