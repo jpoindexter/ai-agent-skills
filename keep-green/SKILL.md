@@ -20,6 +20,7 @@ Keep the current branch green by running the full gate, repairing breaks, and co
 - Never run migrations or touch `.env`/secrets.
 - Never deploy.
 - Give up after 3 attempts on the same failure — report the blocker instead of guessing.
+- Any fix that took more than one attempt: append the lesson to the loop's state file (see `/loop-state`) so the next run doesn't rediscover it.
 
 ## Report format (each run)
 

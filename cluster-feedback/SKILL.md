@@ -17,7 +17,7 @@ Pull new feedback from a source, group it into themes, and surface what changed 
 
 ## Constraints
 
-- Report the delta vs last run — do not re-surface stable themes as if new.
+- Report the delta vs last run — do not re-surface stable themes as if new. Persist last-run timestamp and theme counts in a state file (see `/loop-state`); the delta is impossible without it.
 - Do not editorialize about whether themes are valid. Report what people said.
 - Nothing new → print "no movement" and end.
 

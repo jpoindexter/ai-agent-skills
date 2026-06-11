@@ -17,6 +17,7 @@ Watch production for new errors using connected MCP tools, cluster them by cause
 ## Constraints
 
 - Triage only — never deploy, never modify data, never change config.
+- Persist the last-run timestamp and seen clusters in a state file (see `/loop-state`) — without it every run re-triages from zero.
 - If you see a critical error (data loss risk, auth bypass, billing), escalate immediately instead of waiting for the next run.
 
 ## Report format (each run)

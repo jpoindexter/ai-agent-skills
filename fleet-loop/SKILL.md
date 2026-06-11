@@ -70,6 +70,7 @@ Verifier agent: confirm final page meets rubric; flag any remaining risk.
 ## Slop prevention
 
 - The critic agent scores BEFORE the editor touches anything — never let editing bypass evaluation.
+- Where an objective gate exists (test, build, lint), it outranks the critic's opinion — two agents agreeing is still just two optimists. The critic scores only what can't be machine-checked.
 - Define the rubric before the fleet runs. Changing it mid-run is scope creep.
 - 3 revision cycles with no score improvement = stop and surface the blocker. Compounding rewrites don't fix a bad angle.
 - Verifier is skeptical by default — treat "no comment" as "review incomplete."

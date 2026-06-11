@@ -88,5 +88,6 @@ If the loop runs 3 times without improvement, stop and explain the blocker.
 ## Slop prevention
 
 - The eval gate is the difference between compounding quality and compounding slop.
+- Where an objective gate exists (test, build, lint, word count, link check), it outranks the rubric score — a rubric without any objective signal is the agent grading its own homework.
 - Loose goals ("make it better") always produce generic output. Specify what "better" means.
 - Cap iterations. If quality stops improving after 3 runs, surface the blocker — don't iterate into noise.

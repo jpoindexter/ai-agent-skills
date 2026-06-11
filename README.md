@@ -1,6 +1,6 @@
 # AI Agent Skills
 
-9 reusable skills distilled from the Boris Cherny Build Catalog and the Agent Looping Playbook. Each is a self-contained `SKILL.md` you can install into Claude Code or any agent harness that reads the format.
+12 reusable skills distilled from the Boris Cherny Build Catalog, the Agent Looping Playbook, and the Loop Engineering roadmap. Each is a self-contained `SKILL.md` you can install into Claude Code or any agent harness that reads the format.
 
 ---
 
@@ -451,6 +451,68 @@ Verifier agent: confirm final page meets rubric; flag remaining risk.
 
 ---
 
+### `loop-readiness`
+
+**What it does:** Decision gate run *before* building any loop, automation, or scheduled agent. Scores the task against the 4-condition test (repeats weekly / automated verification / budget absorbs waste / agent has senior-engineer tools) and a 5-point tactical checklist, then returns a verdict: BUILD, KEEP MANUAL, or FIX FIRST. Includes the build order for a minimum viable loop: manual run → skill → state file → loop → schedule.
+
+**When to use it:**
+- Before authoring any `/loop`, `/schedule`, or routine
+- When tempted to automate a task that might not earn it
+- Triaging which of several candidate tasks deserves a loop first
+
+**How to invoke:**
+```
+Run /loop-readiness on "nightly CI failure triage for hashmark".
+```
+
+**Key rule:** Miss one of the 4 conditions → keep it manual. A loop with no objective gate is the agent grading its own homework; a loop with no hard stop runs until the invoice arrives.
+
+---
+
+### `loop-state`
+
+**What it does:** Creates or updates a persistent `STATE.md` for a recurring loop — last run, in progress, completed, escalated, lessons learned. The agent forgets; the repo does not. A loop without state restarts every run; a loop with state resumes. Pairs the state file (where the loop *is*) with a standing spec reread each run (where it's *going*) to prevent goal drift.
+
+**When to use it:**
+- Authoring any new loop (every loop gets one state file)
+- A recurring task keeps restarting from zero or rediscovering the same environment quirks
+- A loop's "since the last run" data has nowhere to live
+
+**How to invoke:**
+```
+Set up /loop-state for the prod-watch loop on prova.
+```
+
+**Rules it enforces:** Read at start, write at end — every run. Lessons-learned is append-only. Escalations are only cleared by humans. One file per loop.
+
+---
+
+### `loop-audit`
+
+**What it does:** Monthly health and security audit of running loops. Checks the named failure modes — quiet exits (Ralph Wiggum loops), self-grading, goal drift, gate rot, missing hard stops — plus the security tax of unattended automation: unreviewed merges, skill injection vectors, credentials in logs, permission scope creep. Verdict per loop: HEALTHY, FIX, or KILL.
+
+**The metric:** cost per accepted change. Accepted-change rate below 50% means you're doing the review work the loop was supposed to save — the loop is losing.
+
+**When to use it:**
+- Monthly, across all active loops and routines
+- A loop's PRs are piling up unread
+- Before granting a loop any new permission
+
+**How to invoke:**
+```
+/schedule monthly: run /loop-audit across all active loops.
+```
+
+**Output format:**
+```
+Loop: <name> | Accepted-change rate: <pct>
+Failure modes: <none | found>
+Security: <clean | finding>
+Verdict: HEALTHY | FIX | KILL
+```
+
+---
+
 ## Composing skills
 
 Skills chain naturally. Some common patterns:
@@ -476,6 +538,12 @@ We're building <X>. Run /scaffold-planning, then use /closed-loop to draft the l
 /loop /hill-climb src/ to zero lint violations, then /ship-preflight before stopping.
 ```
 
+**Loop lifecycle:**
+```
+Run /loop-readiness on the task. If BUILD: set up /loop-state, wrap in /loop with the gate.
+/schedule monthly: /loop-audit across all active loops.
+```
+
 ---
 
 ## Sources
@@ -485,3 +553,4 @@ We're building <X>. Run /scaffold-planning, then use /closed-loop to draft the l
 | `boris-cherny-build-catalog.html` | Boris Cherny, "Why Coding Is Solved" (Anthropic, 2025) — extracted loops, routines, agents, workflows, skills, and patterns mined from 3,716 transcripts |
 | `vanta-build-loops.html` | Companion to the catalog — loop shapes rewritten for Vanta's real commands and two-layer architecture |
 | `agent-looping-playbook.html` | Generic closed-loop and fleet-loop framework for marketing and content ops |
+| Loop Engineering roadmap (Lev Deviatkin, Jun 2026) | 14-step prompter→loop-designer roadmap, sourced from Anthropic engineering docs and Addy Osmani's loop-engineering essay — readiness test, state files, MVL build order, failure modes, security tax |

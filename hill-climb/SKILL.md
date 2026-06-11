@@ -24,7 +24,7 @@ Drive a codebase metric toward a defined target one improvement at a time, witho
 ## Stop conditions
 
 - Target is met (clean measurement).
-- 3 consecutive wakes with zero delta in the violation count — report the blocker and stop.
+- 3 consecutive wakes with zero delta in the violation count — report the blocker and stop. Persist per-wake deltas in a state file (see `/loop-state`) — the no-progress check must survive across sessions.
 
 ## Constraints
 
