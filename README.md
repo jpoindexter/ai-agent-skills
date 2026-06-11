@@ -1,6 +1,69 @@
 # AI Agent Skills
 
-12 reusable skills distilled from the Boris Cherny Build Catalog, the Agent Looping Playbook, and the Loop Engineering roadmap. Each is a self-contained `SKILL.md` you can install into Claude Code or any agent harness that reads the format.
+12 reusable skills for loop engineering — building small systems that prompt coding agents for you instead of prompting them by hand. Each is a self-contained `SKILL.md` you can install into Claude Code or any agent harness that reads the format.
+
+---
+
+## Why this exists
+
+For the last two years, working with a coding agent meant holding it the whole time: write a prompt, wait, read the diff, write the next prompt. The agent was a tool and you were the operator. That's ending. Agents are now good enough that the leverage has moved one floor up — from typing prompts to designing the **loop** that prompts: a small system that finds the work, hands it to the agent, checks the result, records what happened, and decides the next move on its own. You design it once; it prompts the agent from then on.
+
+### What a loop is made of
+
+Every working loop has the same four parts:
+
+| Part | Job | Skill |
+|---|---|---|
+| **Automation** | A schedule or trigger that fires the run — `/loop`, `/schedule`, a routine, a webhook | — |
+| **Skill** | Project knowledge written once, read every run, so the loop doesn't re-derive context from zero | any `SKILL.md` here |
+| **State file** | Persistent memory outside the conversation — what's done, in progress, escalated, learned. The agent forgets; the repo does not. | `loop-state` |
+| **Gate** | An objective check that can fail bad work without a human in the room — tests, typecheck, build, lint | `ship-preflight`, `keep-green` |
+
+The gate is the part that decides whether the loop helps or just spends. A second agent asked to "review" is not a gate — it's a second optimist. Gates return exit codes.
+
+### When a loop earns its cost — and when it doesn't
+
+Loops are not free. They re-read context, retry, and explore, and that burns tokens whether or not the run ships anything. A loop earns its cost only when **all four** of these hold:
+
+1. **The task repeats** — at least weekly. A loop amortizes its setup across runs; for a one-time job, a good prompt is faster and cheaper.
+2. **Verification is automated** — something objective can reject bad output. Otherwise you're back in the chair reading every diff, which is the exact job the loop was supposed to remove.
+3. **Your token budget absorbs the waste** — on a metered plan, the bill arrives before the productivity gain does.
+4. **The agent has senior-engineer tools** — logs, a reproduction environment, the ability to run what it writes. Without those, it iterates blind.
+
+Miss one and the loop costs more than it returns. `loop-readiness` runs this test for you before you build anything.
+
+Good first loops: CI failure triage, dependency bumps, lint-and-fix passes, flaky-test reproduction, issue→PR drafts on well-tested code. Bad first loops — keep a human in the chair: architecture rewrites, auth and payments code, production deploys, anything where "done" is a judgment call.
+
+### How loops fail
+
+The failure modes are known and named, and the skills here are built to block them:
+
+- **Quiet exits** — the loop declares done on a half-finished job because nothing objective failed it. Fix: a real gate (`ship-preflight`), not a soft "looks good."
+- **Self-grading** — the agent that wrote the output also verifies it, and it's way too nice grading its own homework. Fix: a separate skeptic context (`adversarial-verify`).
+- **Restarting from zero** — every run re-derives what the last run already learned. Fix: a state file read at start, written at end (`loop-state`).
+- **Goal drift** — constraints from the original brief evaporate over long sessions. Fix: a standing spec reread each run (`scaffold-planning` + `loop-state`).
+- **No hard stop** — the loop runs until a rate limit or an invoice kills it. Fix: token budget, iteration cap, or time limit, set up front.
+- **Rot** — gates stop catching the failures they were built for, permissions creep, diffs go unread. Fix: a monthly audit with a kill verdict on the table (`loop-audit`).
+
+### The lifecycle
+
+The 12 skills map onto one lifecycle:
+
+```
+DECIDE   loop-readiness                          should this be a loop at all?
+SCAFFOLD scaffold-planning · loop-state          docs + persistent memory
+RUN      keep-green · prod-watch ·               the loop bodies — code, prod,
+         cluster-feedback · hill-climb ·         feedback, metrics, assets,
+         closed-loop · fleet-loop                multi-agent fleets
+VERIFY   adversarial-verify · ship-preflight     skeptic + objective gate
+AUDIT    loop-audit                              monthly: healthy, fix, or kill
+```
+
+Build order matters: get one manual run reliable → turn it into a skill → add a state file → wrap it in a loop with a gate and a hard stop → then schedule it. Skipping ahead is how loops fail in production.
+
+The metric that decides whether any of this is working is **cost per accepted change** — not tokens spent, not tasks attempted. If fewer than half the loop's proposed changes get accepted, you're doing the review work the loop was supposed to save, and the loop is losing.
+
+One last rule that no tooling enforces: **read the diffs.** A loop that ships code nobody reads is comprehension debt at compound interest — the expensive day is the one where you debug a system no one on the team has read.
 
 ---
 
@@ -544,13 +607,3 @@ Run /loop-readiness on the task. If BUILD: set up /loop-state, wrap in /loop wit
 /schedule monthly: /loop-audit across all active loops.
 ```
 
----
-
-## Sources
-
-| File | Contents |
-|---|---|
-| `boris-cherny-build-catalog.html` | Boris Cherny, "Why Coding Is Solved" (Anthropic, 2025) — extracted loops, routines, agents, workflows, skills, and patterns mined from 3,716 transcripts |
-| `vanta-build-loops.html` | Companion to the catalog — loop shapes rewritten for Vanta's real commands and two-layer architecture |
-| `agent-looping-playbook.html` | Generic closed-loop and fleet-loop framework for marketing and content ops |
-| Loop Engineering roadmap (Lev Deviatkin, Jun 2026) | 14-step prompter→loop-designer roadmap, sourced from Anthropic engineering docs and Addy Osmani's loop-engineering essay — readiness test, state files, MVL build order, failure modes, security tax |
